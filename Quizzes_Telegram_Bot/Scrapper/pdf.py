@@ -30,57 +30,57 @@ def get_msq_from_text(file_path):
   try:
       page_text = get_pdf_text(file_path)
       page_lines = page_text.split('\n')
-      question_pattern = re.compile(r'\d+\. (.+)')
-      option_pattern = re.compile(r'(?:\s*[A-D]\. .+)')
-      answer_pattern = re.compile(r'(?:Answer: [A-Z]|ANSWER: [A-Z]|ans: [A-Z])')
+      # Extract Question if start with questions word, or start with number
+      question_pattern = re.compile(r'^\d+\. (.+)|(What|Why|How|When|Where|Who|Which)\s')
+      option_pattern = re.compile(r'(?:\s*[A-D]\.|[a-d]\. .+)')
+      answer_pattern = re.compile(r'(?:Answer: [A-D]|ANSWER: [A-D]|ans: [A-D]|Answer: [a-d]|ANSWER: [a-d]|ans: [a-d])')
       questions = []
       current = ""
-  
+
       for i, line in enumerate(page_lines,0):
-          
-          if re.match(question_pattern, line) :
-              try:
-                  questions.append(question)
-              except:
-                  pass
+          line = line.strip()
+          try:
+              if re.match(question_pattern, line) :
+                  try:
+                      questions.append(question)
+                  except:
+                      pass
+                  print("test")
+                  question = {"question":"","options":[],"answer":"","explanation":"No Explanation","long_question":[],"images":[]}
+                  # Add Questino to 
+                  question["question"] = line
+                  current = "question"
+                  
+              elif re.match(option_pattern, line):
+                  question["options"].append(line)
+                  current = "options"
               
-              question = {"question":"","options":[],"answer":"","explanation":"No Explanation","long_question":[],"images":[]}
-
-              # Add Questino to 
-              question["question"] = line
-              current = "question"
+              elif re.match(answer_pattern, line):
+                  k = {"a":0,"b":1,"c":2,"d":3}
+                  question["answer"]= re.findall(answer_pattern, line)[-1]
+                  current = "answer"
+    
+                  # After Find the Answer time to show if lenght > limit
+                  if len(question["question"]) > 300:
+                            question["question"] = que[:3]
+                            question['long_question'].append(que)
+                  for i, que in  enumerate(question["options"]):
+                      if len(que) > 100:
+                            question["options"][i] = que[:3]
+                            question['long_question'].append(que) 
               
-          elif re.match(option_pattern, line):
-              question["options"].append(line)
-              current = "options"
-          
-          elif re.match(answer_pattern, line):
-              k = {"a":0,"b":1,"c":2,"d":3}
-              question["answer"]= line.strip().split(" ")[1][-1]
-              current = "answer"
-
-              # After Find the Answer time to show if lenght > limit
-              if len(question["question"]) > 300:
-                        question["question"][i] = que[:3]
-                        question['long_question'].append(que)
-              for i, que in  enumerate(question["options"]):
-                  if len(que) > 100:
-                        question["options"][i] = que[:3]
-                        question['long_question'].append(que) 
+              else:
+                  try:
+                      if current == "question":
+                          question[current] += line
+                      elif current == "options" :
+                          question[current][-1] += line
+                  except:
+                      continue
                       
-
-              # Option 
-        
-              
-          
-          else:
-              try:
-                  if current == "question":
-                      question[current] += line
-                  elif current == "options" :
-                      question[current][-1] += line
-              except:
-                  continue
+          except Exception as e :
+                print(e)
+            
   except Exception as e:
       print(e)
 
