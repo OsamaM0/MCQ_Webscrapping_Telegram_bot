@@ -4,13 +4,13 @@ Are you tired of manually copying questions from online sources for your quizzes
 
 ## 🎯 Objective
 
-The objective of this bot is to scrape questions from the Sanfoundry website or PDF files and create quizzes on Telegram. 
+The objective of this bot is to scrape questions from the Sanfoundry website or PDF/docx files and create quizzes on Telegram. 
 
 ## 📝 Features
 
 - **Scrapping Sanfoundry website**: The bot can scrape questions from the Sanfoundry website for a given topic or subtopic. 
 
-- **Scraping PDF files**: The bot can also scrape questions from PDF files for a given topic or subtopic.
+- **Scraping PDF files**: The bot can also scrape questions from PDF/docx files for a given topic or subtopic.
 
 - **Telegram quizzes**: The bot can create quizzes on Telegram based on the scraped questions.
 
@@ -24,10 +24,30 @@ The objective of this bot is to scrape questions from the Sanfoundry website or 
 2. Choose your mode by typing `/mode` in the chat window
 3. Choose the mode of operation: normal mode or quiz mode.
 4. If you chose quiz mode, enter the number of questions and duration of the quiz.
-5. Choose the source from where you want to scrape questions: Sanfoundry website or PDF file.
+5. Choose the source from where you want to scrape questions: Sanfoundry website or PDF/docx file.
 6. Enter the topic or subtopic for which you want to scrape questions.
 7. Sit back and relax while the bot scrapes the questions and creates the quiz for you!
 8. Finally, share the quiz with your friends and colleagues on Telegram.
+
+### Boot Start 
+<p align="center">
+  <img src="https://github.com/OsamaM0/MSQ_Webscrapping_Telegram_bot/blob/main/image/before_start.jpg" width="160" height="300" alt="Start">
+                      
+  <img src="https://github.com/OsamaM0/MSQ_Webscrapping_Telegram_bot/blob/main/image/command.jpg" width="160" height="300" alt="command">
+</p>
+</br>
+
+### Get Use 
+<p align="center">
+  <img src="https://github.com/OsamaM0/MSQ_Webscrapping_Telegram_bot/blob/main/image/normal_mode_doxc.jpg" width="160" height="300"alt="scrapping docx in normal mode">
+  <img src="https://github.com/OsamaM0/MSQ_Webscrapping_Telegram_bot/blob/main/image/quiz_mode_link.jpg" width="160" height="300" alt="scrapping pdf in quizzes mode">
+</p>
+
+### Quiz
+<p align="center">
+  <img src="https://github.com/OsamaM0/MSQ_Webscrapping_Telegram_bot/blob/main/image/quiz.jpg" width="160" height="300"alt="quiz">
+</p>
+
 
 ## 📌 Requirements
 
