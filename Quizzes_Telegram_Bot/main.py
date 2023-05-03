@@ -386,7 +386,7 @@ def poll_handler(update, context):
 
 ##################################### MAIN FUNCTION ########################################
 def main():
-    updater = Updater("6014793546:AAHmUrtaCVEIHWpU_xZYaFMYirJtu-fDbik", use_context=True)
+    updater = Updater("YOUR_BOT_KEY", use_context=True)
 
     dp = updater.dispatcher
 
