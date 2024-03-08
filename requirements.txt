@@ -9,9 +9,5 @@ pypdf2==3.0.1
 validators==0.20.0
 threaded==4.1.0
 regex
-random
-time
-os
-logging
 html
 bs4
