@@ -8,7 +8,7 @@ import random
 from dotenv import load_dotenv, find_dotenv
 from Scrapper import Sanfoundry , pdf
 from server import server
-from _model import *
+from modules import *
 from telegram_used_fun import *
 
 load_dotenv(find_dotenv())

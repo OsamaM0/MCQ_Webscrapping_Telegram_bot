@@ -4,7 +4,14 @@ import html
 from .scrapper import Scrapper
 
 
-
+def scrape_links(url):
+    sc = Scrapper()
+    soup = sc.get_responce(url)
+    links = {}
+    for link in soup.find_all('a'):
+      links[link.text] = link.get('href')
+  
+    return links
 
 
 def scrape_questions(url):
