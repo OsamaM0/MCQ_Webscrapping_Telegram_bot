@@ -6,7 +6,7 @@ import os
 import validators
 import random
 from dotenv import load_dotenv, find_dotenv
-from scrapper import Sanfoundry , pdf
+from Scrapper import Sanfoundry , pdf
 from server import server
 from modules import *
 from telegram_used_fun import *
