@@ -5,6 +5,7 @@ python-dotenv===0.17.1
 beautifulsoup4==4.12.2
 docx2txt==0.8
 flask==2.2.2
+Werkzeug==2.2.2
 pypdf2==3.0.1
 validators==0.20.0
 threaded==4.1.0
