@@ -6,9 +6,10 @@ import os
 import validators
 import random
 from dotenv import load_dotenv, find_dotenv
-from Scrapper import Sanfoundry , pdf
+from scrapper import Sanfoundry , pdf
 from server import server
-from _model import *
+from modules import *
+from telegram_used_fun import *
 
 load_dotenv(find_dotenv())
 
@@ -24,11 +25,6 @@ from telegram.ext import (
 import telegram
 
 ################################### Attribute ###################################
-global btn_pressed, period, number
-btn_pressed = None
-period = 's'
-number = 's'
-
 global users_preference
 users_preference = {}
 
@@ -47,70 +43,61 @@ def main_handler(update, context):
     try:
           file_path = context.bot.get_file(update.message.document).download()
           pdf_msq = pdf.get_msq_from_text(file_path)
-
+          os.remove(file_path)
     except:
           pass
-
-    ######################### Listing For User Action Button Pressed  #########################
-    if get_text_from_callback(update) is not None:
-          mode = get_text_from_callback(update)
-          if mode == "quiz":
-              add_text_message(update, context, " **You Choose Quiz Mode** \n------------------\nSend each value in one line \n\nperiod of Quiz in minutes \nNumber of Questions")
-              users_preference[user_id]["quiz_mode"]["mode"] = mode
-
-
-          elif mode == "normal":
-              values = [mode, None, None, 0] 
-              variable_names = ["mode", "period", "number", "degree"]
-              users_preference[user_id]["quiz_mode"] = dict(zip(variable_names, values))
-              add_text_message(update, context, "Please Send Link/pdf You Want to Scrappe")
-
-          elif mode == "help":
-            mode == "help"
-            help_command_handler(update, context)
-
     ######################### Listing For User Messages  #########################
-    try:
-      if (update.message is not None):
-          # MODE SELECTION 
-          if (users_preference[user_id]["quiz_mode"]["mode"] == "quiz") and (users_preference[user_id]["quiz_mode"]["period"] == None):
-
-                  user_input = get_text_from_message(update)
-                  try:
-                    
-                    p, n = user_input.split('\n')
-                    logging.info(f"user_input : {user_input}")
-                    if p.isdigit() and  n.isdigit():
-                      # Update User  quiz_mode Data
-                      period, number = p, n 
-                      values = ["quiz", period, number, 0] 
-                      variable_names = [" mode", "period", "number", "degree"]
-                      users_preference[user_id]["quiz_mode"] = dict(zip(variable_names, values))
-                      add_text_message(update, context, "Please Send Link/pdf You Want to Scrappe")  
+    try: 
+        if (update.message is not None):
+            # QUIZ MODE SELECTION UPDATE PERIOD
+            if (users_preference[user_id]["quiz_mode"]["mode"] == "quiz") and (users_preference[user_id]["quiz_mode"]["period"] == None):
+                    period = get_text_from_message(update)
+                    if period.isdigit():
+                          users_preference[user_id]["quiz_mode"]["period"] = period
+                          add_text_message(update, context, "What is the number of questions do you want for your Quiz ? ")
                     else:
-                      add_text_message(update, context, f"Please Enter\nperiod as number \nnumber of questions as number") 
-                  except Exception  as e :
-                    add_text_message(update, context, f"Please Enter\nperiod\nnumber of questions")
-                    print(e)
-          elif get_text_from_message(update) not in ["/start", "/help"]:
-              if users_preference[user_id]["quiz_mode"]["mode"] == None:
-                        add_text_message(update, context, f"Please Select Your Mode")
-                        add_suggested_actions(update,context,["help","quiz","normal"])
-
-              else :
-                    mode, period, number, degree = users_preference[user_id]["quiz_mode"].values()
-                    if (pdf_msq != None):
-                          add_text_message(update, context, "**NOTE**\n to get all quizzes correctly the pdf must contain\n*number before question head\n*Character [A-D] before each option \n*Word Answer before correct answer charcter")
-                          quize_mode(update, context,number,period,pdf_msq)
-                          os.remove(file_path)
+                          add_text_message(update, context, f"Please Enter the period as number ") 
+            # QUIZ MODE SELECTION UPDATE NUMBER      
+            elif(users_preference[user_id]["quiz_mode"]["mode"] == "quiz") and  (users_preference[user_id]["quiz_mode"]["number"] == None):
+                    number = get_text_from_message(update)
+                    if number.isdigit():
+                          users_preference[user_id]["quiz_mode"]["number"] = number
+                          add_text_message(update, context, "Please Send Link/pdf You Want to Scrape")  
                     else:
-                        link = get_text_from_message(update)
-                        if validat_link (update, context,link):
-                            msq = Sanfoundry.scrape_questions(link)
-                            quize_mode(update, context,number,period,msq)
+                          add_text_message(update, context, f"Please Enter the number of questions as number ") 
+
+            elif users_preference[user_id]["quiz_mode"]["mode"] == "":
+                    print("link is send")
+                    link = get_text_from_message(update)
+                    if validat_link (update, context,link):
+                        msq = Sanfoundry.scrape_questions(link)
+                        quize_mode(update, context,number,period,msq)
+                      
+            # USER MSQs FILE/Link     
+            elif get_text_from_message(update) not in ["/start", "/help","/mode"]:
+                    # First check if user select any mode
+                    if users_preference[user_id]["quiz_mode"]["mode"] == None:
+                              add_text_message(update, context, f"Please Select Your Mode")
+                              add_suggested_actions(update,context,["help","quiz","normal"])
+                    # if user check any mode now scraping the file/link
+                    else :
+                          mode, period, number, degree = users_preference[user_id]["quiz_mode"].values()
+                          # Scrape file
+                          if (pdf_msq != None):
+                                print("PDF is send")
+                                quize_mode(update, context,number,period,pdf_msq)
+                          # Scrape link
+                          else:
+                              print("link is send")
+                              link = get_text_from_message(update)
+                              if validat_link (update, context,link):
+                                  msq = Sanfoundry.scrape_questions(link)
+                                  quize_mode(update, context,number,period,msq)
+    except Exception  as e:
+      print(e)
                         
-    except Exception as e:
-        print("Sending to quiz mode error: ",e)
+    # except Exception as e:
+    #     print("Sending to quiz mode error: ",e)
 
         # ban member
         # m = context.bot.kick_chat_member(
@@ -136,7 +123,7 @@ def validat_link (update, context,link):
           add_text_message(update, context, f"Please Enter Valid Link For Sanfoundry Page You Want or pdf") 
           return Falase
 
-############################### Functions That Handel Commands ####################################
+############################### Commands Handler ####################################
 def start_command_handler(update, context):
     """Send a message when the command /start is issued."""
     #Reset All Attributes 
@@ -145,11 +132,21 @@ def start_command_handler(update, context):
     users_preference[user_id] = {"quiz_mode":{"mode":None,"period":None,"number":None,"degree":0}
                            ,"file_pref":{"question":"","options":"","answer":""}}
     add_text_message(update, context, f'Welcome : {update["_effective_user"]["first_name"]}  {update["_effective_user"]["last_name"]} at Q4K Quizzes Bot 😊 ')
-    add_suggested_actions(update,context,["help","quiz","normal"])
-    main_handler(update, context)
+    mode_command_handler(update, context)
+
   
     url = update.message.text
+    # keyboard = [['Button 1', 'Button 2'], ['Button 3', 'Button 4']]
+    # reply_markup = telegram.ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+    # update.message.reply_text('Please select a button:', reply_markup=reply_markup)
+   
+def mode_command_handler(update, context):
+    """ Select Preferred Mode when the command /mode is issued."""
+    add_suggested_actions(update,context,["quiz","normal"])
+    main_handler(update, context) 
 
+def btn_link_command_handler(update, context):
+    add_text_message(update, context, f'Enter Main Links That Have Sub Links For MSQs  ')
 
 def help_command_handler(update, context):
     """Send a message when the command /help is issued."""
@@ -168,16 +165,35 @@ There are 2 Mode
         . particular Time
         . particular Number Of Questions that you want 
     2- Normal Mode -> Just Get All Question without any time 
-    
-For Quiz   Mode Press ->  \quiz
-For Normal Mode Press ->  \normal  
+to choose your preferred mode please enter /mode
+For Quiz   Mode Press ->  quiz
+For Normal Mode Press ->  normal  
 
 Developers Telegram Account: @Osama_Mo7
 
     '''
 
     update.message.reply_text(help_message)
-
+  
+###############################  Action Butoon Handlers ####################################
+def action_button_handler(update, context):
+          mode = get_text_from_callback(update)
+          user_id = update["_effective_user"]["id"]
+          global users_preference
+          if mode == "quiz":
+              add_text_message(update, context, " **You Choose Quiz Mode**")
+              add_text_message(update, context, "What is the period do you want for your Quiz in minutes ? ")
+              users_preference[user_id]["quiz_mode"]["mode"] = mode
+            
+          elif mode == "normal":
+              add_text_message(update, context, " **You Choose Normal Mode** ")
+              values = [mode, None, None, 0] 
+              variable_names = ["mode", "period", "number", "degree"]
+              users_preference[user_id]["quiz_mode"] = dict(zip(variable_names, values))
+              add_text_message(update, context, "Please Send Link/pdf You Want to Scrape")
+          elif mode == "help":
+            help_command_handler(update, context)
+  
 
 ############################ Important Functions ##############################################
 
@@ -224,175 +240,20 @@ def quize_mode(update, context,number,peroid,msq):
 
 
 
-
-
-##################################### USER & CHAT INFO #####################################
-def get_chat_id(update, context):
-    chat_id = -1
-
-    if update.message is not None:
-        chat_id = update.message.chat.id
-    elif update.callback_query is not None:
-        chat_id = update.callback_query.message.chat.id
-    elif update.poll is not None:
-        chat_id = context.bot_data[update.poll.id]
-
-    return chat_id
-
-
-def get_user(update):
-    user: User = None
-
-    _from = None
-
-    if update.message is not None:
-        _from = update.message.from_user
-    elif update.callback_query is not None:
-        _from = update.callback_query.from_user
-
-    if _from is not None:
-        user = User()
-        user.id = _from.id
-        user.first_name = _from.first_name if _from.first_name is not None else ""
-        user.last_name = _from.last_name if _from.last_name is not None else ""
-        user.lang = _from.language_code if _from.language_code is not None else "n/a"
-
-    logging.info(f"from {user}")
-
-    return user
-    
-
-def new_member(update, context):
-    logging.info(f"new_member : {update}")
-    add_typing(update, context)
-    add_text_message(update, context, f"New user")
-    print("new User")
-
-##################################### Telegram Send & Get Messages #######################################
-
-def add_typing(update, context):
-    context.bot.send_chat_action(
-        chat_id=get_chat_id(update, context),
-        action=telegram.ChatAction.TYPING,
-        timeout=1,
-    )
-    time.sleep(1)
-
-# Send Message
-def add_text_message(update, context, message):
-    context.bot.send_message(chat_id=get_chat_id(update, context), text=message)
-# Receive Message
-def get_text_from_message(update):
-    return update.message.text
-
-# Send Inline Keyboard Buttons
-def add_suggested_actions(update, context, response):
-    options = []
-
-    for item in response:
-        options.append(InlineKeyboardButton(item, callback_data=item))
-
-    reply_markup = InlineKeyboardMarkup([options])
-
-    context.bot.send_message(
-        chat_id=get_chat_id(update, context),
-        text="Choose Your Preferred Mode !" ,
-        reply_markup=reply_markup,
-    )
-def get_text_from_callback(update):
-    try:
-        chosen =  update['callback_query']['data']
-    except:
-      chosen = None
-    return chosen
-
-
-# Send Quizz Message
-def add_quiz_question(update, context, quiz_question,explanation, peroid=None):
-    message = context.bot.send_poll(
-        chat_id=get_chat_id(update, context),
-        question=quiz_question.question,
-        options=quiz_question.answers,
-        type=Poll.QUIZ,
-        correct_option_id=quiz_question.correct_answer_position,
-        open_period=peroid,
-        is_anonymous=True,
-        explanation=explanation,
-        explanation_parse_mode=telegram.ParseMode.MARKDOWN_V2,
-    )
-
-
-
-    # Save some info about the poll the bot_data for later use in receive_quiz_answer
-    context.bot_data.update({message.poll.id: message.chat.id})
-
-# Send Poll Message
-def add_poll_question(update, context, quiz_question):
-    message = context.bot.send_poll(
-        chat_id=get_chat_id(update, context),
-        question=quiz_question.question,
-        options=quiz_question.answers,
-        type=Poll.REGULAR,
-        allows_multiple_answers=True,
-        is_anonymous=False,
-    )
-
-def get_answer(update):
-    answers = update.poll.options
-
-    ret = ""
-
-    for answer in answers:
-        if answer.voter_count == 1:
-            ret = answer.text
-
-    return ret
-
-
-# determine if user answer is correct
-def is_answer_correct(update):
-    answers = update.poll.options
-
-    ret = False
-    counter = 0
-
-    for answer in answers:
-        if answer.voter_count == 1 and update.poll.correct_option_id == counter:
-            ret = True
-            break
-        counter = counter + 1
-
-    return ret
-
-
-
-def error(update, context):
-    """Log Errors caused by Updates."""
-    logging.warning('Update "%s" ', update)
-    logging.exception(context.error)
-
-def poll_handler(update, context):
-    logging.info(f"question : {update.poll.question}")
-    # logging.info(f"correct option : {update.poll.correct_option_id}")
-    # logging.info(f"option #1 : {update.poll.options[0]}")
-    # logging.info(f"option #2 : {update.poll.options[1]}")
-    # logging.info(f"option #3 : {update.poll.options[2]}")
-    # logging.info(f"option #4 : {update.poll.options[3]}")
-
-    user_answer = get_answer(update)
-    logging.info(f"correct option {is_answer_correct(update)}")
-
-
-
+#Keyboards links
+def keyboard_links():
+  links = 0
 ##################################### MAIN FUNCTION ########################################
 def main():
-    updater = Updater("YOUR_BOT_KEY", use_context=True)
+    updater = Updater(os.environ.get("TELEGRAM_TOKEN", ""), use_context=True)
 
     dp = updater.dispatcher
 
     # command handlers
     dp.add_handler(CommandHandler("help", help_command_handler))
     dp.add_handler(CommandHandler("start", start_command_handler))
+    dp.add_handler(CommandHandler("mode", mode_command_handler))
+
 
     # message handler
     dp.add_handler(MessageHandler(Filters.text, main_handler))
@@ -403,7 +264,7 @@ def main():
 
     # suggested_actions_handler
     dp.add_handler(
-        CallbackQueryHandler(main_handler, pass_chat_data=True, pass_user_data=True)
+        CallbackQueryHandler(action_button_handler, pass_chat_data=True, pass_user_data=True)
     )
     # quiz answer handler
     dp.add_handler(PollHandler(poll_handler, pass_chat_data=True, pass_user_data=True))
@@ -428,6 +289,8 @@ def main():
 
     updater.idle()
 
+    
+
 
 class DefaultConfig:
     PORT = int(os.environ.get("PORT", 3978))
@@ -444,9 +307,8 @@ class DefaultConfig:
             level=DefaultConfig.LOG_LEVEL,
         )
 
-
 if __name__ == "__main__":
-    server()
+    server()    
     ascii_banner = pyfiglet.figlet_format("SampleTelegramQuiz")
     print(ascii_banner)
 
@@ -454,3 +316,4 @@ if __name__ == "__main__":
     DefaultConfig.init_logging()
 
     main()
+
