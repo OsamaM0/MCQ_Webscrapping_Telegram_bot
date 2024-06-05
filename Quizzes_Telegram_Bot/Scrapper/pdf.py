@@ -4,7 +4,7 @@ import docx2txt
 import re
 
 
-def get_text_from_file(file_path):
+def get_pdf_text(file_path):
     # Get the file extension
     file_extension = os.path.splitext(file_path)[1].lower()
     # Extract text from the document
@@ -25,7 +25,7 @@ def get_text_from_file(file_path):
     return page_text
 
 
-def get_mcq_from_text(file_path):
+def get_msq_from_text(file_path):
     try:
         page_text = get_text_from_file(file_path)
         page_lines = page_text.split('\n')
