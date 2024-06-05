@@ -30,7 +30,7 @@ def get_msq_from_text(file_path):
     page_lines = page_text.split('\n')
     # Extract Question if start with questions word, or start with number
     question_pattern = re.compile(r'^\d+\. (.+)|(What|Why|How|When|Where|Who|Which)\s')
-    option_pattern = re.compile(r'(?:\s*[A-D]\.|[a-d]\. .+)')
+    option_pattern = re.compile(r'(?:\s*[A-Da-d][\.\)\-] .+)')
     answer_pattern = re.compile(r'(?:Answer: [A-D]|ANSWER: [A-D]|ans: [A-D]|Answer: [a-d]|ANSWER: [a-d]|ans: [a-d])')
 
     questions = []
