@@ -12,3 +12,5 @@ threaded==4.1.0
 regex
 html
 bs4
+pymupdf
+python-docx
