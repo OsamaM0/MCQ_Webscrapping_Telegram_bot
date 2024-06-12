@@ -37,6 +37,7 @@ def get_msq_from_text(file_path):
         question_pattern = r'^\d+\. .+|^\d+\- .+|(What|Why|How|When|Where|Who|Which)\s'
         option_pattern = r'^\s*[A-Da-d][\-\.\)] .+'
         answer_pattern = r'(Answer: [A-Da-d]|ANSWER:[A-Da-d]|ans: [A-Da-d]|Answer [A-Da-d]|ANSWER [A-Da-d]|ans [A-Da-d])'
+        explination_pattern = r'(Explanation:[A-Da-d]|Explanation[A-Da-d]|Explanation :[A-Da-d]|Explanation :[A-Da-d]|Explanation: [A-Da-d]|Explanation : [A-Da-d])'
         k = {"a": 0, "b": 1, "c": 2, "d": 3, "A": 0, "B": 1, "C": 2, "D": 3}
 
         question = None
@@ -67,6 +68,10 @@ def get_msq_from_text(file_path):
                     if question:
                         question["answer"] = k[re.findall(answer_pattern, line)[0][-1]]
 
+                elif re.match(explination_pattern, line):
+                    if question:
+                        question["explanation"] = line
+
                 elif question:
                     question["question"] += " " + line
 
@@ -77,3 +82,5 @@ def get_msq_from_text(file_path):
         print(f"Error parsing questions: {e}")
 
     return questions
+
+
